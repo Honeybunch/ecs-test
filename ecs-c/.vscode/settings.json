@@ -1,0 +1,13 @@
+{
+  "files.associations": {
+    "*.rt": "hlsl",
+    "array": "c",
+    "forward_list": "c",
+    "vector": "c",
+    "xmemory": "c",
+    "xstring": "c",
+    "xtree": "c",
+    "xutility": "c",
+    "sdl_stdinc.h": "c"
+  }
+}
