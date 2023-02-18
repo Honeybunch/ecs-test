@@ -1,3 +1,4 @@
+#include "arenaalloc.hpp"
 #include "world.hpp"
 
 #include <SDL2/SDL_main.h>
@@ -8,7 +9,12 @@ int32_t SDL_main(int32_t argc, char *argv[]) {
   (void)argc;
   (void)argv;
 
-  World world();
+  // Create allocators
+  auto tmp_alloc = Allocator<ArenaAllocator>();
+  ArenaAllocator &arena_alloc = tmp_alloc.get_impl();
+
+  auto world = World();
+
   // Main loop
   bool running = true;
 
@@ -32,6 +38,7 @@ int32_t SDL_main(int32_t argc, char *argv[]) {
       break;
     }
 
+    arena_alloc.reset();
     FrameMark;
   }
 

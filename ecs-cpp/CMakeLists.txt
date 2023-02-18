@@ -13,3 +13,6 @@ target_link_libraries(ecs-cpp PRIVATE
   Threads::Threads
   $<TARGET_NAME_IF_EXISTS:SDL2::SDL2main>
   $<IF:$<TARGET_EXISTS:SDL2::SDL2>,SDL2::SDL2,SDL2::SDL2-static>)
+if(NOT MSVC)
+  target_link_options(ecs-cpp PRIVATE -Wl,/subsystem:windows)
+endif()
