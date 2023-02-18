@@ -1,19 +1,31 @@
 #include "arenaalloc.hpp"
+#include "orbitsystem.hpp"
+#include "stdalloc.hpp"
 #include "world.hpp"
 
 #include <SDL2/SDL_main.h>
 #include <SDL2/SDL_timer.h>
 #include <tracy/Tracy.hpp>
 
+class SampleSystems : public SystemsBase {
+public:
+  SampleSystems() : orbit(0) { systems = std::vector<System *>({&orbit}); }
+  ~SampleSystems() {}
+
+private:
+  OrbitSystem orbit;
+};
+
 int32_t SDL_main(int32_t argc, char *argv[]) {
   (void)argc;
   (void)argv;
 
   // Create allocators
-  auto tmp_alloc = Allocator<ArenaAllocator>();
-  ArenaAllocator &arena_alloc = tmp_alloc.get_impl();
+  auto tmp_alloc = ArenaAllocator(512 * 1000 * 1000);
+  ArenaAllocatorImpl &arena_alloc = tmp_alloc.get_impl();
+  auto std_alloc = StdAllocator(0);
 
-  auto world = World();
+  auto world = World<SampleSystems>(&std_alloc, &tmp_alloc);
 
   // Main loop
   bool running = true;
@@ -25,6 +37,7 @@ int32_t SDL_main(int32_t argc, char *argv[]) {
   float delta_time_seconds = 0.0f;
 
   while (running) {
+    ZoneScopedN("Main Loop");
     // Use SDL High Performance Counter to get timing info
     time = SDL_GetPerformanceCounter() - start_time;
     delta_time = time - last_time;

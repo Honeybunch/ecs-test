@@ -6,7 +6,7 @@ find_package(Threads REQUIRED)
 find_package(Tracy CONFIG REQUIRED)
 find_package(SDL2 CONFIG REQUIRED)
 
-file(GLOB_RECURSE source "source/*.cpp")
+file(GLOB_RECURSE source CONFIGURE_DEPENDS "source/*.cpp")
 add_executable(ecs-cpp ${source})
 target_link_libraries(ecs-cpp PRIVATE
   Tracy::TracyClient

@@ -4,11 +4,11 @@
 
 #include <vector>
 
-class ArenaAllocator : public AllocatorImpl {
+class ArenaAllocatorImpl : public AllocatorImpl {
 public:
-  ArenaAllocator() = delete;
-  ArenaAllocator(size_t size);
-  ~ArenaAllocator();
+  ArenaAllocatorImpl() = delete;
+  ArenaAllocatorImpl(size_t size);
+  ~ArenaAllocatorImpl();
 
   void *alloc(size_t size) override;
   void *realloc(void *original, size_t size) override;
@@ -20,3 +20,5 @@ private:
   size_t head = 0;
   std::vector<uint8_t> memory;
 };
+
+using ArenaAllocator = Allocator<ArenaAllocatorImpl>;
