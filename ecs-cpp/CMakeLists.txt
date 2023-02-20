@@ -16,3 +16,4 @@ target_link_libraries(ecs-cpp PRIVATE
 if(NOT MSVC)
   target_link_options(ecs-cpp PRIVATE -Wl,/subsystem:windows)
 endif()
+target_compile_features(ecs-cpp PRIVATE cxx_std_20)

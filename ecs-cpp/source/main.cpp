@@ -1,31 +1,40 @@
 #include "arenaalloc.hpp"
+#include "orbitcomponent.hpp"
 #include "orbitsystem.hpp"
 #include "stdalloc.hpp"
+#include "transformcomponent.hpp"
 #include "world.hpp"
 
 #include <SDL2/SDL_main.h>
 #include <SDL2/SDL_timer.h>
 #include <tracy/Tracy.hpp>
 
-class SampleSystems : public SystemsBase {
-public:
-  SampleSystems() : orbit(0) { systems = std::vector<System *>({&orbit}); }
-  ~SampleSystems() {}
-
-private:
-  OrbitSystem orbit;
-};
+struct AppSystems : public SystemStorage<OrbitSystem> {};
+struct AppComponents
+    : public ComponentStorage<TransformComponent, OrbitComponent> {};
 
 int32_t SDL_main(int32_t argc, char *argv[]) {
   (void)argc;
   (void)argv;
-
   // Create allocators
   auto tmp_alloc = ArenaAllocator(512 * 1000 * 1000);
   ArenaAllocatorImpl &arena_alloc = tmp_alloc.get_impl();
   auto std_alloc = StdAllocator(0);
 
-  auto world = World<SampleSystems>(&std_alloc, &tmp_alloc);
+  auto world = World<AppSystems, AppComponents>(&std_alloc, &tmp_alloc);
+
+  // Add a simple entity
+  TransformComponentDescriptor trans_desc = {};
+  OrbitComponentDescriptor orbit_desc = {};
+  orbit_desc.center = {0, 0, 0};
+  orbit_desc.distance = 100.0f;
+  orbit_desc.axis = {0, 1, 0};
+  orbit_desc.speed = 10.0f;
+  const std::vector<const ComponentBase *> comp_descs = {
+      &trans_desc,
+      &orbit_desc,
+  };
+  world.add_entity(comp_descs);
 
   // Main loop
   bool running = true;

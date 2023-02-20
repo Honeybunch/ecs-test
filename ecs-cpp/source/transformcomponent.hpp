@@ -3,9 +3,18 @@
 #include "component.hpp"
 #include "simd.hpp"
 
-class TransformComponent : public Component {
+static constexpr ComponentId TransformComponentId = 0xDEAD0001;
+
+struct TransformComponentDescriptor
+    : public ComponentDescriptor<TransformComponentId> {
+  Transform transform;
+};
+
+class TransformComponent : public Component<TransformComponentId> {
 public:
   TransformComponent() {}
+  TransformComponent(const TransformComponentDescriptor &desc)
+      : transform(desc.transform) {}
   ~TransformComponent() {}
 
   Transform &get_transform();

@@ -8,14 +8,8 @@ struct SystemOutput {};
 
 class System {
 public:
-  System(uint32_t id) : id(id) {}
+  System() {}
   ~System() {}
-
-  uint32_t get_id() const { return id; }
-
   virtual void tick(const SystemInput &input, SystemOutput &output,
                     float delta_seconds) = 0;
-
-private:
-  uint32_t id;
 };

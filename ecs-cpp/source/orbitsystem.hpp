@@ -4,7 +4,7 @@
 
 class OrbitSystem : public System {
 public:
-  OrbitSystem(uint32_t id);
+  OrbitSystem();
   ~OrbitSystem();
 
   void tick(const SystemInput &input, SystemOutput &output,

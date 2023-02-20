@@ -2,7 +2,7 @@
 
 #include <tracy/Tracy.hpp>
 
-OrbitSystem::OrbitSystem(uint32_t id) : System(id) {}
+OrbitSystem::OrbitSystem() {}
 OrbitSystem::~OrbitSystem() {}
 
 void OrbitSystem::tick(const SystemInput &input, SystemOutput &output,
