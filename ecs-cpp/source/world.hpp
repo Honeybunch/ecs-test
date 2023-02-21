@@ -25,18 +25,8 @@ struct WorldDescriptor {
 class World {
 
 public:
-  World(const WorldDescriptor &desc) {
-    std_alloc = desc.std_alloc;
-    tmp_alloc = desc.tmp_alloc;
-  }
-  ~World() {
-    for (const auto &kvp : systems) {
-      std_alloc->free(kvp.second);
-    }
-    for (const auto &kvp : stores) {
-      std_alloc->free(kvp.second);
-    }
-  }
+  World(const WorldDescriptor &desc);
+  ~World();
 
   template <SystemId id, typename T> void register_system() {
     systems[id] = static_cast<System *>(new (std_alloc->alloc<T>()) T());
@@ -47,41 +37,10 @@ public:
                                                        T(*std_alloc));
   }
 
-  bool tick(float delta_seconds) {
-    ZoneScopedN("World Tick");
-
-    for (const auto &kvp : systems) {
-      SystemOutput out = {};
-      kvp.second->tick({}, out, delta_seconds);
-    }
-
-    return true;
-  }
-
-  EntityId add_entity(const std::span<const ComponentDescriptorBase *> &descs) {
-    ZoneScopedN("Add Entity");
-
-    EntityId id = static_cast<EntityId>(entities.size());
-    Entity entity = 0;
-    // Add a component to each column
-    uint32_t store_idx = 0;
-    for (const auto &kvp : stores) {
-      kvp.second->alloc_component();
-      for (const auto &desc : descs) {
-        // If component matches one of the given descriptors, mark it on the
-        // entity and initialize it
-        if (desc->get_id() == kvp.first) {
-          entity |= 1 << store_idx;
-          kvp.second->init_component(id, desc);
-          break;
-        }
-      }
-      store_idx++;
-    }
-
-    entities.push_back(entity);
-    return id;
-  }
+  bool tick(float delta_seconds);
+  EntityId add_entity(const std::span<const ComponentDescriptorBase *> &descs);
+  void filter_system_input(System *system, SystemInput &input);
+  void write_system_output(const SystemOutput &out);
 
 private:
   using Entities = std::vector<Entity>;
