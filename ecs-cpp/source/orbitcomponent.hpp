@@ -3,8 +3,6 @@
 #include "component.hpp"
 #include "simd.hpp"
 
-#include <new>
-
 static constexpr ComponentId OrbitComponentId = 0xDEAD0000;
 
 struct OrbitComponentDescriptor;

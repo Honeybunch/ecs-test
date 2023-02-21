@@ -1,6 +1,5 @@
 #include "application.hpp"
 
-#include "allocator.hpp"
 #include "world.hpp"
 
 #include <SDL2/SDL_timer.h>
