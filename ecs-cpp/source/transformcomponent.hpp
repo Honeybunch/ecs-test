@@ -21,8 +21,8 @@ private:
   Transform transform;
 };
 
-struct TransformComponentDescriptor : public ComponentDescriptor {
-  TransformComponentDescriptor() { id = TransformComponentId; }
+struct TransformComponentDescriptor
+    : public ComponentDescriptor<TransformComponentId> {
   Transform transform;
 };
 

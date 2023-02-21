@@ -58,7 +58,7 @@ public:
     return true;
   }
 
-  EntityId add_entity(const std::span<const ComponentDescriptor *> &descs) {
+  EntityId add_entity(const std::span<const ComponentDescriptorBase *> &descs) {
     ZoneScopedN("Add Entity");
 
     EntityId id = static_cast<EntityId>(entities.size());
@@ -70,7 +70,7 @@ public:
       for (const auto &desc : descs) {
         // If component matches one of the given descriptors, mark it on the
         // entity and initialize it
-        if (desc->id == kvp.first) {
+        if (desc->get_id() == kvp.first) {
           entity |= 1 << store_idx;
           kvp.second->init_component(id, desc);
           break;

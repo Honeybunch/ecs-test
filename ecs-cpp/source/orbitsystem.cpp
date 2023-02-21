@@ -8,5 +8,4 @@ OrbitSystem::~OrbitSystem() {}
 void OrbitSystem::tick(const SystemInput &input, SystemOutput &output,
                        float delta_seconds) {
   ZoneScopedN("OrbitSystem");
-  _sleep(50);
 }

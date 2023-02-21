@@ -22,8 +22,7 @@ private:
   Quaternion rotation;
 };
 
-struct OrbitComponentDescriptor : public ComponentDescriptor {
-  OrbitComponentDescriptor() { id = OrbitComponentId; }
+struct OrbitComponentDescriptor : public ComponentDescriptor<OrbitComponentId> {
   float3 center;
   float distance;
   float3 axis;

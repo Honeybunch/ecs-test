@@ -33,7 +33,7 @@ int32_t SDL_main(int32_t argc, char *argv[]) {
   orbit_comp_desc.axis = float3{0.0f, 1.0f, 0.0f};
   orbit_comp_desc.speed = 10.0f;
 
-  std::array<const ComponentDescriptor *, 2> comp_descs = {
+  std::array<const ComponentDescriptorBase *, 2> comp_descs = {
       &transform_comp_desc,
       &orbit_comp_desc,
   };
