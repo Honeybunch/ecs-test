@@ -12,13 +12,9 @@ struct SystemInput {};
 
 struct SystemOutput {};
 
-struct SystemInputQuery {
-  std::span<ComponentId> components;
-};
+struct SystemInputQuery : public std::span<ComponentId> {};
 
-struct SystemInputQuerySet {
-  std::span<SystemInputQuery> sets;
-};
+struct SystemInputQuerySet : public std::span<SystemInputQuery> {};
 
 class System {
 public:

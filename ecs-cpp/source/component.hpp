@@ -27,6 +27,11 @@ public:
 
 template <typename Comp, typename Desc>
 class ComponentStore : public ComponentStoreBase {
+  static_assert(std::is_base_of<Component, Comp>::value,
+                "Comp must derive from Component");
+  static_assert(std::is_base_of<ComponentDescriptorBase, Desc>::value,
+                "Desc must derive from ComponentDescriptorBase");
+
 public:
   ComponentStore(StdAllocator &alloc) : alloc(&alloc) {}
 
