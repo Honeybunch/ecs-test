@@ -3,25 +3,16 @@
 #include "component.hpp"
 #include "simd.hpp"
 
+#include <new>
+
 static constexpr ComponentId OrbitComponentId = 0xDEAD0000;
 
-struct OrbitComponentDescriptor : public ComponentDescriptor<OrbitComponentId> {
-  float3 center;
-  float distance;
-  float3 axis;
-  float speed;
-};
+struct OrbitComponentDescriptor;
 
-class OrbitComponent : public Component<OrbitComponentId> {
+class OrbitComponent : public Component {
 public:
-  OrbitComponent(float3 center, float distance, float3 axis, float speed)
-      : center(center), distance(distance), axis(axis), speed(speed),
-        rotation(Quaternion{0, 0, 0, 1}) {}
-  OrbitComponent(const OrbitComponentDescriptor &desc)
-      : center(desc.center), distance(desc.distance), axis(desc.axis),
-        speed(desc.speed), rotation(Quaternion{0, 0, 0, 1}) {}
-  OrbitComponent() {}
-  ~OrbitComponent() {}
+  OrbitComponent(const OrbitComponentDescriptor &desc);
+  ~OrbitComponent();
 
 private:
   float3 center;
@@ -30,3 +21,14 @@ private:
   float speed;
   Quaternion rotation;
 };
+
+struct OrbitComponentDescriptor : public ComponentDescriptor {
+  OrbitComponentDescriptor() { id = OrbitComponentId; }
+  float3 center;
+  float distance;
+  float3 axis;
+  float speed;
+};
+
+using OrbitComponentStore =
+    ComponentStore<OrbitComponent, OrbitComponentDescriptor>;

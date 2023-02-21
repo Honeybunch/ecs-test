@@ -1,6 +1,10 @@
 #pragma once
 
+#include "stdalloc.hpp"
+
 #include <stdint.h>
+
+using SystemId = uint32_t;
 
 struct SystemInput {};
 

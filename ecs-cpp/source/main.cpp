@@ -9,10 +9,6 @@
 #include <SDL2/SDL_timer.h>
 #include <tracy/Tracy.hpp>
 
-struct AppSystems : public SystemStorage<OrbitSystem> {};
-struct AppComponents
-    : public ComponentStorage<TransformComponent, OrbitComponent> {};
-
 int32_t SDL_main(int32_t argc, char *argv[]) {
   (void)argc;
   (void)argv;
@@ -21,18 +17,25 @@ int32_t SDL_main(int32_t argc, char *argv[]) {
   ArenaAllocatorImpl &arena_alloc = tmp_alloc.get_impl();
   auto std_alloc = StdAllocator(0);
 
-  auto world = World<AppSystems, AppComponents>(&std_alloc, &tmp_alloc);
+  WorldDescriptor world_desc = {
+      .std_alloc = &std_alloc,
+      .tmp_alloc = &tmp_alloc,
+  };
+  auto world = World(world_desc);
+  world.register_system<OrbitSystemId, OrbitSystem>();
+  world.register_component<TransformComponentId, TransformComponentStore>();
+  world.register_component<OrbitComponentId, OrbitComponentStore>();
 
   // Add a simple entity
-  TransformComponentDescriptor trans_desc = {};
-  OrbitComponentDescriptor orbit_desc = {};
-  orbit_desc.center = {0, 0, 0};
-  orbit_desc.distance = 100.0f;
-  orbit_desc.axis = {0, 1, 0};
-  orbit_desc.speed = 10.0f;
-  const std::vector<const ComponentBase *> comp_descs = {
-      &trans_desc,
-      &orbit_desc,
+  auto transform_comp_desc = TransformComponentDescriptor();
+  auto orbit_comp_desc = OrbitComponentDescriptor();
+  orbit_comp_desc.distance = 100.0f;
+  orbit_comp_desc.axis = float3{0.0f, 1.0f, 0.0f};
+  orbit_comp_desc.speed = 10.0f;
+
+  std::array<const ComponentDescriptor *, 2> comp_descs = {
+      &transform_comp_desc,
+      &orbit_comp_desc,
   };
   world.add_entity(comp_descs);
 

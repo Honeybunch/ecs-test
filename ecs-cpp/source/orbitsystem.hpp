@@ -2,6 +2,12 @@
 
 #include "system.hpp"
 
+#include <new>
+
+class OrbitSystemDescriptor;
+
+static constexpr SystemId OrbitSystemId = 0xDEADFF00;
+
 class OrbitSystem : public System {
 public:
   OrbitSystem();
