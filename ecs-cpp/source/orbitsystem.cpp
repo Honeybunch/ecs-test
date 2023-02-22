@@ -9,13 +9,13 @@ OrbitSystem::~OrbitSystem() {}
 SystemInputQuerySet OrbitSystem::get_input_queries() const {
   ZoneScopedN("OrbitSystem::get_input_queries");
 
-  std::array<ComponentId, 2> query = {
+  static std::array<ComponentId, 2> query = {
       TransformComponentId,
       OrbitComponentId,
   };
-  std::array<SystemInputQuery, 1> queries = {SystemInputQuery{query}};
+  static std::array<SystemInputQuery, 1> queries = {SystemInputQuery(query)};
 
-  return SystemInputQuerySet{queries};
+  return SystemInputQuerySet(queries);
 }
 
 const SystemOutput &OrbitSystem::tick(const SystemInput &input,

@@ -11,16 +11,10 @@ using ComponentId = uint32_t;
 using SystemId = uint32_t;
 using EntityId = size_t;
 
-struct InputComponentStore {
-  ComponentId id;
-
-  size_t count;
-  size_t comp_size;
-  void *components;
-};
+struct PackedComponentStoreBase;
 
 struct SystemInputSet {
-  std::span<InputComponentStore> stores;
+  std::span<const PackedComponentStoreBase *> stores;
   std::span<EntityId> entities;
 };
 
@@ -41,9 +35,9 @@ struct SystemWriteSet : public SystemWriteSetBase {
 
 using SystemOutput = std::span<SystemWriteSetBase>;
 
-struct SystemInputQuery : public std::span<ComponentId> {};
+using SystemInputQuery = std::span<ComponentId>;
 
-struct SystemInputQuerySet : public std::span<SystemInputQuery> {};
+using SystemInputQuerySet = std::span<SystemInputQuery>;
 
 class System {
 public:

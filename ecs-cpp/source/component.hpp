@@ -1,8 +1,11 @@
 #pragma once
 
+#include "arenaalloc.hpp"
 #include "stdalloc.hpp"
 
 #include <stdint.h>
+
+#include <span>
 
 using EntityId = size_t;
 using ComponentId = uint32_t;
@@ -18,11 +21,22 @@ struct ComponentDescriptor : public ComponentDescriptorBase {
   ComponentId get_id() const override { return cid; }
 };
 
+struct PackedComponentStoreBase {};
+
+template <typename Comp>
+struct PackedComponentStore : public PackedComponentStoreBase {
+  std::span<Comp> components;
+};
+
 class ComponentStoreBase {
 public:
   virtual void alloc_component() = 0;
   virtual void init_component(EntityId id,
                               const ComponentDescriptorBase *desc) = 0;
+
+  virtual const PackedComponentStoreBase *
+  pack_components(ArenaAllocator &tmp_alloc,
+                  std::span<EntityId> entities) const = 0;
 
   virtual const Component *read_component(size_t idx) const = 0;
   virtual void write_component(size_t idx, const Component *comp) = 0;
@@ -52,6 +66,26 @@ public:
     Comp &comp = components[id];
     new (&comp) Comp(*static_cast<const Desc *>(desc));
   }
+
+  const PackedComponentStoreBase *
+  pack_components(ArenaAllocator &tmp_alloc,
+                  std::span<EntityId> entities) const override {
+    auto packed_store = tmp_alloc.alloc<PackedComponentStore<Comp>>();
+    auto *storage = tmp_alloc.alloc_num<Comp>(entities.size());
+    packed_store->components = std::span<Comp>(storage, entities.size());
+
+    size_t packed_idx = 0;
+    for (EntityId i = 0; i < comp_count; ++i) {
+      for (EntityId e : entities) {
+        if (e == i) {
+          packed_store->components[packed_idx++] = components[i];
+          break;
+        }
+      }
+    }
+
+    return static_cast<const PackedComponentStoreBase *>(packed_store);
+  };
 
   const Component *read_component(size_t idx) const override {
     return static_cast<const Component *>(&components[idx]);

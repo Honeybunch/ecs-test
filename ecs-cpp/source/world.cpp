@@ -77,6 +77,7 @@ const SystemInput &World::filter_system_input(System *system) {
     for (const auto &entity : entities) {
       size_t matching_comp_count = 0;
       for (const auto &comp_id : query) {
+        // TODO: Determine if entity has the given component
       }
 
       if (matching_comp_count == query.size()) {
@@ -89,17 +90,30 @@ const SystemInput &World::filter_system_input(System *system) {
       continue;
     }
 
+    std::span<EntityId> input_entities =
+        std::span<EntityId>(entity_ids, entity_count);
+
     // One store per component in the query
-    InputComponentStore *stores =
-        tmp_alloc->alloc_num<InputComponentStore>(query.size());
+    auto *packed_stores =
+        tmp_alloc->alloc_num<const PackedComponentStoreBase *>(query.size());
+    {
+      size_t i = 0;
+      for (ComponentId id : query) {
+        packed_stores[i] =
+            stores[id]->pack_components(*tmp_alloc, input_entities);
+        i++;
+      }
+    }
 
     // Allocate space in this set for each component and entity
     SystemInputSet &set = sets[query_idx];
-    set.entities = std::span<EntityId>(entity_ids, entity_count);
-    set.stores = std::span<InputComponentStore>(stores, query.size());
+    set.entities = input_entities;
+    set.stores = std::span<const PackedComponentStoreBase *>(packed_stores,
+                                                             query.size());
   }
 
   auto *input = tmp_alloc->alloc<SystemInput>();
+  *input = SystemInput(sets, query_count);
   return *input;
 }
 
