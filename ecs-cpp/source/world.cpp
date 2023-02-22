@@ -21,12 +21,10 @@ bool World::tick(float delta_seconds) {
     System *system = kvp.second;
 
     // Gather packed input for the system
-    SystemInput input = {};
-    filter_system_input(system, input);
+    const SystemInput &input = filter_system_input(system);
 
     // Tick the system to retrieve output
-    SystemOutput out = {};
-    system->tick(input, out, delta_seconds);
+    const SystemOutput &out = system->tick(input, delta_seconds);
 
     // Write system output back to the world
     write_system_output(out);
@@ -61,10 +59,48 @@ World::add_entity(const std::span<const ComponentDescriptorBase *> &descs) {
   return id;
 }
 
-void World::filter_system_input(System *system, SystemInput &input) {
+const SystemInput &World::filter_system_input(System *system) {
   ZoneScopedN("World::filter_system_input");
   const SystemInputQuerySet &input_queries = system->get_input_queries();
-  input = {};
+
+  // Each input query gets its own space in the input structure
+  const size_t query_count = input_queries.size();
+  SystemInputSet *sets = tmp_alloc->alloc_num<SystemInputSet>(query_count);
+
+  for (size_t query_idx = 0; query_idx < query_count; ++query_idx) {
+    const auto &query = input_queries[query_idx];
+    // Figure out which entities match this filter
+    // Worst case all entities do
+    EntityId *entity_ids = tmp_alloc->alloc_num<EntityId>(entities.size());
+    size_t entity_count = 0;
+
+    for (const auto &entity : entities) {
+      size_t matching_comp_count = 0;
+      for (const auto &comp_id : query) {
+      }
+
+      if (matching_comp_count == query.size()) {
+        entity_ids[entity_count++] = entity;
+      }
+    }
+
+    // No entities have the required components? Give up on this query
+    if (entity_count == 0) {
+      continue;
+    }
+
+    // One store per component in the query
+    InputComponentStore *stores =
+        tmp_alloc->alloc_num<InputComponentStore>(query.size());
+
+    // Allocate space in this set for each component and entity
+    SystemInputSet &set = sets[query_idx];
+    set.entities = std::span<EntityId>(entity_ids, entity_count);
+    set.stores = std::span<InputComponentStore>(stores, query.size());
+  }
+
+  auto *input = tmp_alloc->alloc<SystemInput>();
+  return *input;
 }
 
 void World::write_system_output(const SystemOutput &out) {

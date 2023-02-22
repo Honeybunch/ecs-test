@@ -23,6 +23,9 @@ public:
   virtual void alloc_component() = 0;
   virtual void init_component(EntityId id,
                               const ComponentDescriptorBase *desc) = 0;
+
+  virtual const Component *read_component(size_t idx) const = 0;
+  virtual void write_component(size_t idx, const Component *comp) = 0;
 };
 
 template <typename Comp, typename Desc>
@@ -48,6 +51,13 @@ public:
                       const ComponentDescriptorBase *desc) override {
     Comp &comp = components[id];
     new (&comp) Comp(*static_cast<const Desc *>(desc));
+  }
+
+  const Component *read_component(size_t idx) const override {
+    return static_cast<const Component *>(&components[idx]);
+  }
+  void write_component(size_t idx, const Component *comp) override {
+    components[idx] = *static_cast<const Comp *>(comp);
   }
 
 private:

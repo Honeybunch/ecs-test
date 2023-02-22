@@ -15,11 +15,11 @@ static constexpr SystemId OrbitSystemId = 0xDEADFF00;
 
 class OrbitSystem : public System {
 public:
-  OrbitSystem();
+  OrbitSystem(StdAllocator &std_alloc, ArenaAllocator &tmp_alloc);
   ~OrbitSystem();
 
   SystemInputQuerySet get_input_queries() const override;
 
-  void tick(const SystemInput &input, SystemOutput &output,
-            float delta_seconds) override;
+  const SystemOutput &tick(const SystemInput &input,
+                           float delta_seconds) override;
 };

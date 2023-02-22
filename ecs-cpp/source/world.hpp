@@ -29,7 +29,8 @@ public:
   ~World();
 
   template <SystemId id, typename T> void register_system() {
-    systems[id] = static_cast<System *>(new (std_alloc->alloc<T>()) T());
+    systems[id] = static_cast<System *>(new (std_alloc->alloc<T>())
+                                            T(*std_alloc, *tmp_alloc));
   }
 
   template <ComponentId id, typename T> void register_component() {
@@ -39,7 +40,7 @@ public:
 
   bool tick(float delta_seconds);
   EntityId add_entity(const std::span<const ComponentDescriptorBase *> &descs);
-  void filter_system_input(System *system, SystemInput &input);
+  const SystemInput &filter_system_input(System *system);
   void write_system_output(const SystemOutput &out);
 
 private:

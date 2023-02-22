@@ -2,7 +2,8 @@
 
 #include <tracy/Tracy.hpp>
 
-OrbitSystem::OrbitSystem() {}
+OrbitSystem::OrbitSystem(StdAllocator &std_alloc, ArenaAllocator &tmp_alloc)
+    : System(std_alloc, tmp_alloc) {}
 OrbitSystem::~OrbitSystem() {}
 
 SystemInputQuerySet OrbitSystem::get_input_queries() const {
@@ -17,7 +18,10 @@ SystemInputQuerySet OrbitSystem::get_input_queries() const {
   return SystemInputQuerySet{queries};
 }
 
-void OrbitSystem::tick(const SystemInput &input, SystemOutput &output,
-                       float delta_seconds) {
+const SystemOutput &OrbitSystem::tick(const SystemInput &input,
+                                      float delta_seconds) {
   ZoneScopedN("OrbitSystem::tick");
+  auto *output = System::tmp_alloc->alloc<SystemOutput>();
+
+  return *output;
 }
