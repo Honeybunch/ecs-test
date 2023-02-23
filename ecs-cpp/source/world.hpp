@@ -34,8 +34,9 @@ public:
   }
 
   template <ComponentId id, typename T> void register_component() {
-    stores[id] = static_cast<ComponentStoreBase *>(new (std_alloc->alloc<T>())
-                                                       T(*std_alloc));
+    const size_t store_count = stores.size();
+    stores[id] = static_cast<ComponentStoreBase *>(
+        new (std_alloc->alloc<T>()) T(*std_alloc, store_count));
   }
 
   bool tick(float delta_seconds);

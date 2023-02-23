@@ -34,6 +34,8 @@ public:
   virtual void init_component(EntityId id,
                               const ComponentDescriptorBase *desc) = 0;
 
+  virtual size_t get_store_idx() const = 0;
+
   virtual const PackedComponentStoreBase *
   pack_components(ArenaAllocator &tmp_alloc,
                   std::span<EntityId> entities) const = 0;
@@ -50,7 +52,8 @@ class ComponentStore : public ComponentStoreBase {
                 "Desc must derive from ComponentDescriptorBase");
 
 public:
-  ComponentStore(StdAllocator &alloc) : alloc(&alloc) {}
+  ComponentStore(StdAllocator &alloc, size_t store_idx)
+      : alloc(&alloc), store_idx(store_idx) {}
 
   void alloc_component() override {
     const size_t next_count = comp_count + 1;
@@ -66,6 +69,8 @@ public:
     Comp &comp = components[id];
     new (&comp) Comp(*static_cast<const Desc *>(desc));
   }
+
+  size_t get_store_idx() const override { return store_idx; }
 
   const PackedComponentStoreBase *
   pack_components(ArenaAllocator &tmp_alloc,
@@ -100,4 +105,5 @@ private:
   size_t comp_count = 0;
   Comp *components = nullptr;
   size_t comp_max = 0;
+  size_t store_idx;
 };

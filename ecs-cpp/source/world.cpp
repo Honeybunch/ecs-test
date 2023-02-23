@@ -77,7 +77,11 @@ const SystemInput &World::filter_system_input(System *system) {
     for (const auto &entity : entities) {
       size_t matching_comp_count = 0;
       for (const auto &comp_id : query) {
-        // TODO: Determine if entity has the given component
+        // Determine if entity has the given component
+        const size_t store_idx = stores[comp_id]->get_store_idx();
+        if (entity & (1 << store_idx)) {
+          matching_comp_count++;
+        }
       }
 
       if (matching_comp_count == query.size()) {
