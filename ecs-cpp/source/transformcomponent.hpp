@@ -14,10 +14,6 @@ public:
   TransformComponent(const TransformComponentDescriptor &desc);
   ~TransformComponent();
 
-  Transform &get_transform();
-  const Transform &get_transform() const;
-
-private:
   Transform transform;
 };
 

@@ -1,10 +1,12 @@
 #pragma once
 
 #include "arenaalloc.hpp"
+#include "component.hpp"
 #include "stdalloc.hpp"
 
-#include <span>
 #include <stdint.h>
+
+#include <span>
 #include <vector>
 
 using ComponentId = uint32_t;
@@ -23,7 +25,7 @@ using SystemInput = std::span<SystemInputSet>;
 struct SystemWriteSetBase {};
 
 template <typename Comp> struct SystemWrite {
-  EntityId id;
+  EntityId entity;
   const Comp *component;
 };
 
@@ -33,7 +35,7 @@ struct SystemWriteSet : public SystemWriteSetBase {
   std::span<SystemWrite<Comp>> writes;
 };
 
-using SystemOutput = std::span<SystemWriteSetBase>;
+using SystemOutput = std::span<const SystemWriteSetBase *>;
 
 using SystemInputQuery = std::span<ComponentId>;
 
@@ -48,6 +50,21 @@ public:
   virtual SystemInputQuerySet get_input_queries() const = 0;
   virtual const SystemOutput &tick(const SystemInput &input,
                                    float delta_seconds) = 0;
+
+  template <typename T>
+  PackedComponentStore<T> &
+  make_out_copy(const PackedComponentStoreBase *input) {
+    const PackedComponentStore<T> *in =
+        static_cast<const PackedComponentStore<T> *>(input);
+
+    auto *out_copy = tmp_alloc->alloc<PackedComponentStore<T>>();
+    const auto comp_count = in->components.size();
+    T *out_comps = tmp_alloc->alloc_num<T>(comp_count);
+    SDL_memcpy(out_comps, in->components.data(), comp_count * sizeof(T));
+
+    out_copy->components = std::span<T>(out_comps, comp_count);
+    return *out_copy;
+  }
 
 protected:
   StdAllocator *std_alloc;

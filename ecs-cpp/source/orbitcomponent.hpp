@@ -12,7 +12,6 @@ public:
   OrbitComponent(const OrbitComponentDescriptor &desc);
   ~OrbitComponent();
 
-private:
   float3 center;
   float distance;
   float3 axis;
