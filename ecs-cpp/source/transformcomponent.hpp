@@ -11,10 +11,11 @@ struct TransformComponentDescriptor;
 
 class TransformComponent : public Component {
 public:
+  TransformComponent();
   TransformComponent(const TransformComponentDescriptor &desc);
   ~TransformComponent();
 
-  Transform transform;
+  Transform transform = {};
 };
 
 struct TransformComponentDescriptor
@@ -23,4 +24,5 @@ struct TransformComponentDescriptor
 };
 
 using TransformComponentStore =
-    ComponentStore<TransformComponent, TransformComponentDescriptor>;
+    ComponentStore<TransformComponent, TransformComponentDescriptor,
+                   TransformComponentId>;

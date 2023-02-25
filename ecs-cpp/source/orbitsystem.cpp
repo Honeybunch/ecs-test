@@ -67,10 +67,13 @@ const SystemOutput &OrbitSystem::tick(const SystemInput &input,
   auto *trans_write_set =
       tmp_alloc
           ->alloc<SystemWriteSet<TransformComponent, TransformComponentId>>();
+  new (trans_write_set)(
+      SystemWriteSet<TransformComponent, TransformComponentId>);
   trans_write_set->writes =
       std::span<SystemWrite<TransformComponent>>(trans_writes, orbiter_count);
   auto *orbit_write_set =
       tmp_alloc->alloc<SystemWriteSet<OrbitComponent, OrbitComponentId>>();
+  new (orbit_write_set)(SystemWriteSet<OrbitComponent, OrbitComponentId>);
   orbit_write_set->writes =
       std::span<SystemWrite<OrbitComponent>>(orbit_writes, orbiter_count);
 

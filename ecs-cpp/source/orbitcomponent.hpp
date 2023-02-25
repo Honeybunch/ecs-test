@@ -9,6 +9,7 @@ struct OrbitComponentDescriptor;
 
 class OrbitComponent : public Component {
 public:
+  OrbitComponent();
   OrbitComponent(const OrbitComponentDescriptor &desc);
   ~OrbitComponent();
 
@@ -27,4 +28,4 @@ struct OrbitComponentDescriptor : public ComponentDescriptor<OrbitComponentId> {
 };
 
 using OrbitComponentStore =
-    ComponentStore<OrbitComponent, OrbitComponentDescriptor>;
+    ComponentStore<OrbitComponent, OrbitComponentDescriptor, OrbitComponentId>;

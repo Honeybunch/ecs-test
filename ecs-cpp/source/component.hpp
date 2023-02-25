@@ -2,6 +2,7 @@
 
 #include "arenaalloc.hpp"
 #include "stdalloc.hpp"
+#include "system.hpp"
 
 #include <stdint.h>
 
@@ -26,6 +27,8 @@ struct PackedComponentStoreBase {};
 template <typename Comp>
 struct PackedComponentStore : public PackedComponentStoreBase {
   std::span<Comp> components;
+  Comp *comps;
+  size_t count;
 };
 
 class ComponentStoreBase {
@@ -41,10 +44,10 @@ public:
                   std::span<EntityId> entities) const = 0;
 
   virtual const Component *read_component(size_t idx) const = 0;
-  virtual void write_component(size_t idx, const Component *comp) = 0;
+  virtual void write_components(const SystemWriteSetBase *set) = 0;
 };
 
-template <typename Comp, typename Desc>
+template <typename Comp, typename Desc, ComponentId cid>
 class ComponentStore : public ComponentStoreBase {
   static_assert(std::is_base_of<Component, Comp>::value,
                 "Comp must derive from Component");
@@ -76,13 +79,17 @@ public:
   pack_components(ArenaAllocator &tmp_alloc,
                   std::span<EntityId> entities) const override {
     auto packed_store = tmp_alloc.alloc<PackedComponentStore<Comp>>();
+    new (packed_store)(PackedComponentStore<Comp>)();
     auto *storage = tmp_alloc.alloc_num<Comp>(entities.size());
+    packed_store->comps = storage;
+    packed_store->count = entities.size();
     packed_store->components = std::span<Comp>(storage, entities.size());
 
     size_t packed_idx = 0;
     for (EntityId i = 0; i < comp_count; ++i) {
       for (EntityId e : entities) {
         if (e == i) {
+          new (&components[i])(Comp)();
           packed_store->components[packed_idx++] = components[i];
           break;
         }
@@ -95,8 +102,12 @@ public:
   const Component *read_component(size_t idx) const override {
     return static_cast<const Component *>(&components[idx]);
   }
-  void write_component(size_t idx, const Component *comp) override {
-    components[idx] = *static_cast<const Comp *>(comp);
+  void write_components(const SystemWriteSetBase *set) override {
+    const auto *write_set =
+        static_cast<const SystemWriteSet<Component, cid> *>(set);
+    for (const auto &write : write_set->writes) {
+      components[write.entity] = *static_cast<const Comp *>(write.component);
+    }
   }
 
 private:

@@ -85,7 +85,7 @@ const SystemInput &World::filter_system_input(System *system) {
       }
 
       if (matching_comp_count == query.size()) {
-        entity_ids[entity_count++] = entity;
+        entity_ids[entity_count++] = entity_count;
       }
     }
 
@@ -123,4 +123,9 @@ const SystemInput &World::filter_system_input(System *system) {
 
 void World::write_system_output(const SystemOutput &out) {
   ZoneScopedN("World::write_system_output");
+
+  for (const auto &write_set : out) {
+    auto &store = stores[write_set->get_id()];
+    store->write_components(write_set);
+  }
 }

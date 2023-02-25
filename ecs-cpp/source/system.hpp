@@ -1,7 +1,6 @@
 #pragma once
 
 #include "arenaalloc.hpp"
-#include "component.hpp"
 #include "stdalloc.hpp"
 
 #include <stdint.h>
@@ -14,6 +13,7 @@ using SystemId = uint32_t;
 using EntityId = size_t;
 
 struct PackedComponentStoreBase;
+template <typename T> struct PackedComponentStore;
 
 struct SystemInputSet {
   std::span<const PackedComponentStoreBase *> stores;
@@ -22,7 +22,9 @@ struct SystemInputSet {
 
 using SystemInput = std::span<SystemInputSet>;
 
-struct SystemWriteSetBase {};
+struct SystemWriteSetBase {
+  virtual ComponentId get_id() const = 0;
+};
 
 template <typename Comp> struct SystemWrite {
   EntityId entity;
@@ -31,7 +33,7 @@ template <typename Comp> struct SystemWrite {
 
 template <typename Comp, ComponentId cid>
 struct SystemWriteSet : public SystemWriteSetBase {
-  const ComponentId id = cid;
+  ComponentId get_id() const { return cid; }
   std::span<SystemWrite<Comp>> writes;
 };
 
@@ -60,7 +62,9 @@ public:
     auto *out_copy = tmp_alloc->alloc<PackedComponentStore<T>>();
     const auto comp_count = in->components.size();
     T *out_comps = tmp_alloc->alloc_num<T>(comp_count);
-    SDL_memcpy(out_comps, in->components.data(), comp_count * sizeof(T));
+    for (size_t i = 0; i < comp_count; ++i) {
+      out_comps[i] = in->components[i];
+    }
 
     out_copy->components = std::span<T>(out_comps, comp_count);
     return *out_copy;

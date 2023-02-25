@@ -18,7 +18,7 @@ public:
 
 private:
   size_t head = 0;
-  std::vector<uint8_t> memory;
+  uint8_t *memory;
 };
 
 using ArenaAllocator = Allocator<ArenaAllocatorImpl>;
