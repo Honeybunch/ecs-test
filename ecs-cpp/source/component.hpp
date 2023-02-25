@@ -89,7 +89,6 @@ public:
     for (EntityId i = 0; i < comp_count; ++i) {
       for (EntityId e : entities) {
         if (e == i) {
-          new (&components[i])(Comp)();
           packed_store->components[packed_idx++] = components[i];
           break;
         }
