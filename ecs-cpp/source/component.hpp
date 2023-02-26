@@ -27,8 +27,6 @@ struct PackedComponentStoreBase {};
 template <typename Comp>
 struct PackedComponentStore : public PackedComponentStoreBase {
   std::span<Comp> components;
-  Comp *comps;
-  size_t count;
 };
 
 class ComponentStoreBase {
@@ -78,22 +76,19 @@ public:
   const PackedComponentStoreBase *
   pack_components(ArenaAllocator &tmp_alloc,
                   std::span<EntityId> entities) const override {
-    auto packed_store = tmp_alloc.alloc<PackedComponentStore<Comp>>();
-    new (packed_store)(PackedComponentStore<Comp>)();
-    auto *storage = tmp_alloc.alloc_num<Comp>(entities.size());
-    packed_store->comps = storage;
-    packed_store->count = entities.size();
-    packed_store->components = std::span<Comp>(storage, entities.size());
+    auto packed_store = tmp_alloc.alloc_new<PackedComponentStore<Comp>>();
 
+    auto storage = tmp_alloc.alloc_span<Comp>(entities.size());
     size_t packed_idx = 0;
     for (EntityId i = 0; i < comp_count; ++i) {
       for (EntityId e : entities) {
         if (e == i) {
-          packed_store->components[packed_idx++] = components[i];
+          storage[packed_idx++] = components[i];
           break;
         }
       }
     }
+    packed_store->components = storage;
 
     return static_cast<const PackedComponentStoreBase *>(packed_store);
   };

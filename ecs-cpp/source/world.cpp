@@ -65,13 +65,13 @@ const SystemInput &World::filter_system_input(System *system) {
 
   // Each input query gets its own space in the input structure
   const size_t query_count = input_queries.size();
-  SystemInputSet *sets = tmp_alloc->alloc_num<SystemInputSet>(query_count);
+  auto sets = tmp_alloc->alloc_span<SystemInputSet>(query_count);
 
   for (size_t query_idx = 0; query_idx < query_count; ++query_idx) {
     const auto &query = input_queries[query_idx];
     // Figure out which entities match this filter
     // Worst case all entities do
-    EntityId *entity_ids = tmp_alloc->alloc_num<EntityId>(entities.size());
+    auto entity_ids = tmp_alloc->alloc_span<EntityId>(entities.size());
     size_t entity_count = 0;
 
     for (const auto &entity : entities) {
@@ -94,30 +94,25 @@ const SystemInput &World::filter_system_input(System *system) {
       continue;
     }
 
-    std::span<EntityId> input_entities =
-        std::span<EntityId>(entity_ids, entity_count);
-
     // One store per component in the query
-    auto *packed_stores =
-        tmp_alloc->alloc_num<const PackedComponentStoreBase *>(query.size());
+    auto packed_stores =
+        tmp_alloc->alloc_span<const PackedComponentStoreBase *>(query.size());
     {
       size_t i = 0;
       for (ComponentId id : query) {
-        packed_stores[i] =
-            stores[id]->pack_components(*tmp_alloc, input_entities);
+        packed_stores[i] = stores[id]->pack_components(*tmp_alloc, entity_ids);
         i++;
       }
     }
 
     // Allocate space in this set for each component and entity
     SystemInputSet &set = sets[query_idx];
-    set.entities = input_entities;
-    set.stores = std::span<const PackedComponentStoreBase *>(packed_stores,
-                                                             query.size());
+    set.entities = entity_ids;
+    set.stores = packed_stores;
   }
 
   auto *input = tmp_alloc->alloc<SystemInput>();
-  *input = SystemInput(sets, query_count);
+  *input = sets;
   return *input;
 }
 

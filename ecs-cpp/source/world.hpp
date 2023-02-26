@@ -29,14 +29,18 @@ public:
   ~World();
 
   template <SystemId id, typename T> void register_system() {
-    systems[id] = static_cast<System *>(new (std_alloc->alloc<T>())
-                                            T(*std_alloc, *tmp_alloc));
+
+    // Using std_alloc->alloc_new crashes while placement new explicitly does
+    // not?
+    // auto *ptr = std_alloc->alloc_new<T>(*std_alloc, *tmp_alloc);
+    auto *ptr = std_alloc->alloc<T>();
+    new (ptr) T(*std_alloc, *tmp_alloc);
+    systems[id] = static_cast<System *>(ptr);
   }
 
   template <ComponentId id, typename T> void register_component() {
-    const size_t store_count = stores.size();
     stores[id] = static_cast<ComponentStoreBase *>(
-        new (std_alloc->alloc<T>()) T(*std_alloc, store_count));
+        std_alloc->alloc_new<T>(*std_alloc, stores.size()));
   }
 
   bool tick(float delta_seconds);

@@ -24,18 +24,16 @@ SystemInputQuerySet OrbitSystem::get_input_queries() const {
 const SystemOutput &OrbitSystem::tick(const SystemInput &input,
                                       float delta_seconds) {
   ZoneScopedN("OrbitSystem::tick");
-  auto *output = System::tmp_alloc->alloc<SystemOutput>();
-
   const SystemInputSet &set = input[0];
   const size_t orbiter_count = set.entities.size();
 
   auto &trans_comps = make_out_copy<TransformComponent>(set.stores[0]);
   auto &orbit_comps = make_out_copy<OrbitComponent>(set.stores[1]);
 
-  auto *trans_writes =
-      tmp_alloc->alloc_num<SystemWrite<TransformComponent>>(orbiter_count);
-  auto *orbit_writes =
-      tmp_alloc->alloc_num<SystemWrite<OrbitComponent>>(orbiter_count);
+  auto trans_writes =
+      tmp_alloc->alloc_span<SystemWrite<TransformComponent>>(orbiter_count);
+  auto orbit_writes =
+      tmp_alloc->alloc_span<SystemWrite<OrbitComponent>>(orbiter_count);
 
   for (size_t i = 0; i < orbiter_count; ++i) {
     const EntityId entity = set.entities[i];
@@ -64,25 +62,20 @@ const SystemOutput &OrbitSystem::tick(const SystemInput &input,
     orbit_writes[i] = {entity, &orbit_comp};
   }
 
-  auto *trans_write_set =
-      tmp_alloc
-          ->alloc<SystemWriteSet<TransformComponent, TransformComponentId>>();
-  new (trans_write_set)(
-      SystemWriteSet<TransformComponent, TransformComponentId>);
-  trans_write_set->writes =
-      std::span<SystemWrite<TransformComponent>>(trans_writes, orbiter_count);
+  auto *trans_write_set = tmp_alloc->alloc_new<
+      SystemWriteSet<TransformComponent, TransformComponentId>>();
+  trans_write_set->writes = trans_writes;
   auto *orbit_write_set =
-      tmp_alloc->alloc<SystemWriteSet<OrbitComponent, OrbitComponentId>>();
-  new (orbit_write_set)(SystemWriteSet<OrbitComponent, OrbitComponentId>);
-  orbit_write_set->writes =
-      std::span<SystemWrite<OrbitComponent>>(orbit_writes, orbiter_count);
+      tmp_alloc->alloc_new<SystemWriteSet<OrbitComponent, OrbitComponentId>>();
+  orbit_write_set->writes = orbit_writes;
 
   const size_t write_set_count = 2;
-  auto *writes =
-      tmp_alloc->alloc_num<const SystemWriteSetBase *>(write_set_count);
+  auto writes =
+      tmp_alloc->alloc_span<const SystemWriteSetBase *>(write_set_count);
   writes[0] = static_cast<const SystemWriteSetBase *>(trans_write_set);
   writes[1] = static_cast<const SystemWriteSetBase *>(orbit_write_set);
 
-  *output = SystemOutput(writes, write_set_count);
+  auto *output = System::tmp_alloc->alloc<SystemOutput>();
+  *output = writes;
   return *output;
 }

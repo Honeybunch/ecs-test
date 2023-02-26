@@ -61,12 +61,12 @@ public:
 
     auto *out_copy = tmp_alloc->alloc<PackedComponentStore<T>>();
     const auto comp_count = in->components.size();
-    T *out_comps = tmp_alloc->alloc_num<T>(comp_count);
+    auto out_comps = tmp_alloc->alloc_span<T>(comp_count);
     for (size_t i = 0; i < comp_count; ++i) {
       out_comps[i] = in->components[i];
     }
 
-    out_copy->components = std::span<T>(out_comps, comp_count);
+    out_copy->components = out_comps;
     return *out_copy;
   }
 

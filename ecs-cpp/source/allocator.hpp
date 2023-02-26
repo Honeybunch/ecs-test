@@ -1,6 +1,6 @@
 #pragma once
 
-#include <cstdint>
+#include <span>
 #include <type_traits>
 
 class AllocatorImpl {
@@ -25,15 +25,26 @@ public:
     return static_cast<T *>(impl.alloc(sizeof(T)));
   }
 
+  template <typename T, typename... Args> T *alloc_new(Args... args) {
+    T *ptr = alloc<T>();
+    new (ptr)(T)(args...);
+    return ptr;
+  }
+
   template <typename T> T *realloc(T *original) {
     return static_cast<T *>(impl.realloc(original, sizeof(T)));
   }
 
-  template <typename T> T *alloc_num(uint32_t num) {
+  template <typename T> T *alloc_num(size_t num) {
     return static_cast<T *>(impl.alloc(sizeof(T) * num));
   };
 
-  template <typename T> T *realloc_num(T *original, uint32_t num) {
+  template <typename T> std::span<T> alloc_span(size_t num) {
+    T *array = alloc_num<T>(num);
+    return std::span<T>(array, num);
+  }
+
+  template <typename T> T *realloc_num(T *original, size_t num) {
     return static_cast<T *>(impl.realloc(original, sizeof(T) * num));
   };
 
