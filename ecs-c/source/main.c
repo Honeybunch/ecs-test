@@ -80,7 +80,6 @@ int32_t SDL_main(int32_t argc, char *argv[]) {
   bool success = tb_create_world(&world_desc, &world);
 
   TransformComponentDescriptor trans_comp_desc = {
-      .world = &world,
       .transform = {
           .position = (float3){0},
           .rotation = (Quaternion){0, 0, 0, 1},

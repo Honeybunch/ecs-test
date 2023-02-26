@@ -8,6 +8,9 @@
     "xstring": "c",
     "xtree": "c",
     "xutility": "c",
-    "sdl_stdinc.h": "c"
+    "sdl_stdinc.h": "c",
+    "algorithm": "c",
+    "locale": "c",
+    "optional": "c"
   }
 }
