@@ -70,11 +70,25 @@ name = "ecs-rust"
 version = "0.1.0"
 dependencies = [
  "bumpalo",
+ "ecs_rust_derive",
+ "ecs_rust_types",
  "sdl2",
  "tracing-tracy",
  "tracy-client",
  "tracy-client-sys",
 ]
+
+[[package]]
+name = "ecs_rust_derive"
+version = "0.1.0"
+dependencies = [
+ "quote",
+ "syn",
+]
+
+[[package]]
+name = "ecs_rust_types"
+version = "0.1.0"
 
 [[package]]
 name = "encoding_rs"

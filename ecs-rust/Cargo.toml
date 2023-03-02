@@ -10,7 +10,15 @@ bumpalo = "3.12.0"
 tracy-client = "0.15.1"
 tracy-client-sys = "0.20.0"
 tracing-tracy = "0.10.2"
+ecs_rust_derive = { path = "./ecs_rust_derive" }
+ecs_rust_types = { path = "./ecs_rust_types" }
 
 [dependencies.sdl2]
 version = "0.34.0"
 features = ["bundled","static-link"]
+
+[workspace]
+members = [
+  "ecs_rust_derive",
+  "ecs_rust_types",
+]

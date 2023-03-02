@@ -1,9 +1,16 @@
+mod orbitsystem;
+mod system;
+mod transformcomponent;
 mod world;
 
 use bumpalo::Bump;
 use sdl2::sys::*;
 use tracy_client::*;
 
+use ecs_rust_types::Component;
+
+use orbitsystem::OrbitSystem;
+use transformcomponent::TransformComponent;
 use world::World;
 
 // For Tracy memory tracking
@@ -20,9 +27,13 @@ fn main() {
 
     // Register component types
     // Register system types
+    let orbitsytem = OrbitSystem::new();
 
     // Create world
     let mut world = World::new();
+    world.register_system(Box::new(orbitsytem));
+
+    TransformComponent::component_macro();
 
     // Create test entity
 
